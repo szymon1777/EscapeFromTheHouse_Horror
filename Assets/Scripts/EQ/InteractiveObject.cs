@@ -79,18 +79,27 @@ public class InteractiveObject : MonoBehaviour
 
     private void ExecuteInteraction(PickableItem itemUsed)
     {
+        // Odtwórz dŸwiêk interakcji
         if (interactionSound != null)
         {
             audioSource.PlayOneShot(interactionSound);
-            // POWIADOMIENIE AI O HA£ASIE INTERAKCJI:
-            EnemyAI.Instance?.RegisterNoise(transform.position, interactionSoundRange);
+
+            // POPRAWIONE: Okreœlamy typ dŸwiêku i pakujemy go w NoiseData
+            NoiseType currentType = (objectType == ObjectType.Door) ? NoiseType.DoorInteraction : NoiseType.LockUnlock;
+            NoiseData noise = new NoiseData(transform.position, interactionSoundRange, currentType);
+
+            EnemyAI.Instance?.RegisterNoise(noise);
+
+            Debug.Log($"Ha³as: U¿yto obiektu {gameObject.name} w pozycji {transform.position}");
         }
 
-        if (itemUsed != null && destroyOnUse)
+        // Jeœli u¿yliœmy przedmiotu (np. klucza do k³ódki), niszczymy ten przedmiot z rêki gracza
+        if (requiresItem && itemUsed != null)
         {
             Destroy(itemUsed.gameObject);
         }
 
+        // Logika zachowania obiektu (np. animacja otwierania drzwi lub zniszczenie k³ódki)
         if (objectType == ObjectType.Door)
         {
             isOpen = !isOpen;
@@ -98,6 +107,10 @@ public class InteractiveObject : MonoBehaviour
         else if (destroyOnUse)
         {
             Destroy(gameObject, 0.1f);
+        }
+        else
+        {
+            gameObject.SetActive(false);
         }
     }
 }

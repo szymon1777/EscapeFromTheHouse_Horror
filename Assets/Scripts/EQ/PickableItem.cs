@@ -43,11 +43,16 @@ public class PickableItem : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        // Wykrywamy mocniejsze uderzenie o ziemiê/œciany
         if (collision.relativeVelocity.magnitude > 1.5f && dropSound != null)
         {
             audioSource.PlayOneShot(dropSound);
-            // POWIADOMIENIE AI O HA£ASIE UPADKU:
-            EnemyAI.Instance?.RegisterNoise(transform.position, soundRange);
+
+            // POPRAWIONE: Tworzymy paczkê danych NoiseData zamiast podawaæ dwa parametry
+            NoiseData noise = new NoiseData(transform.position, soundRange, NoiseType.ItemDrop);
+            EnemyAI.Instance?.RegisterNoise(noise);
+
+            Debug.Log($"Ha³as: Upuszczono {itemName} w pozycji {transform.position}");
         }
     }
 }
